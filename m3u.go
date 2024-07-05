@@ -83,3 +83,14 @@ func (p Playlist) Deduplicate() Playlist {
 
 	return newP
 }
+
+func (p Playlist) Join(other Playlist) Playlist {
+	newP := Playlist{}
+	newP.Tracks = append(newP.Tracks, p.Tracks...)
+	newP.Tracks = append(newP.Tracks, other.Tracks...)
+
+	newP.Ext = append(newP.Ext, p.Ext...)
+	newP.Ext = append(newP.Ext, other.Ext...)
+
+	return newP
+}

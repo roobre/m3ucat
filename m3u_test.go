@@ -296,3 +296,75 @@ func TestPlaylist_Deduplicate(t *testing.T) {
 		})
 	}
 }
+
+func TestPlaylist_Join(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name     string
+		first    m3u.Playlist
+		second   m3u.Playlist
+		expected m3u.Playlist
+	}{
+		{
+			name: "Tracks only",
+			first: m3u.Playlist{
+				Tracks: []m3u.Track{
+					{Path: "/1/bar.flac"},
+					{Path: "/2/far.flac"},
+				},
+			},
+			second: m3u.Playlist{
+				Tracks: []m3u.Track{
+					{Path: "/3/bar.flac"},
+					{Path: "/4/far.flac"},
+				},
+			},
+			expected: m3u.Playlist{
+				Tracks: []m3u.Track{
+					{Path: "/1/bar.flac"},
+					{Path: "/2/far.flac"},
+					{Path: "/3/bar.flac"},
+					{Path: "/4/far.flac"},
+				},
+			},
+		},
+		{
+			name: "Metadata",
+			first: m3u.Playlist{
+				Ext: []string{
+					"#EXTFOO",
+				},
+			},
+			second: m3u.Playlist{
+				Ext: []string{
+					"#EXTBAR",
+				},
+				Tracks: []m3u.Track{
+					{Path: "/3/bar.flac"},
+					{Path: "/4/far.flac"},
+				},
+			},
+			expected: m3u.Playlist{
+				Ext: []string{
+					"#EXTFOO",
+					"#EXTBAR",
+				},
+				Tracks: []m3u.Track{
+					{Path: "/3/bar.flac"},
+					{Path: "/4/far.flac"},
+				},
+			},
+		},
+	} {
+		tc := tc
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			if diff := cmp.Diff(tc.first.Join(tc.second), tc.expected); diff != "" {
+				t.Fatalf("Deduped playlist does not match expected:\n%s", diff)
+			}
+		})
+	}
+}
