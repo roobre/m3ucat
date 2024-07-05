@@ -17,7 +17,21 @@ type Track struct {
 	Path string
 }
 
+type Decoder struct {
+	// IsGlobalDirective, is used to check whether a directive is assumed to belong to the playlist itself, instead of
+	// the next track in the file.
+	// Examples of this include #PLAYLIST:, but other implementations may use others.
+	// IsGlobalDirectve receives the whole directive line, including the leading #.
+	IsGlobalDirective func(string) bool
+}
+
+var defaultDecoder = Decoder{}
+
 func Decode(src io.Reader) (Playlist, error) {
+	return defaultDecoder.Decode(src)
+}
+
+func (d Decoder) Decode(src io.Reader) (Playlist, error) {
 	scn := bufio.NewScanner(src)
 
 	playlist := Playlist{}
@@ -33,7 +47,12 @@ func Decode(src io.Reader) (Playlist, error) {
 		}
 
 		if strings.HasPrefix(line, "#") {
-			track.Ext = append(track.Ext, line)
+			if d.IsGlobalDirective != nil && d.IsGlobalDirective(line) {
+				playlist.Ext = append(playlist.Ext, line)
+			} else {
+				track.Ext = append(track.Ext, line)
+			}
+
 			continue
 		}
 
@@ -49,6 +68,13 @@ func (p Playlist) Encode(w io.Writer) error {
 	_, err := fmt.Fprintln(w, "#EXTM3U")
 	if err != nil {
 		return err
+	}
+
+	for _, ext := range p.Ext {
+		_, err := fmt.Fprintln(w, ext)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, track := range p.Tracks {

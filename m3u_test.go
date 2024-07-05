@@ -16,6 +16,7 @@ func TestDecode(t *testing.T) {
 	for _, tc := range []struct {
 		name      string
 		src       string
+		decoder   m3u.Decoder
 		expect    m3u.Playlist
 		expectErr error
 	}{
@@ -104,13 +105,34 @@ func TestDecode(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Playlist-level attributes",
+			decoder: m3u.Decoder{IsGlobalDirective: func(s string) bool {
+				return strings.Contains(s, "PLAYLIST")
+			}},
+			src: `
+#EXTM3U
+#PLAYLIST:Title
+/foo/bar.flac
+/boo/far.flac
+			`,
+			expect: m3u.Playlist{
+				Ext: []string{
+					"#PLAYLIST:Title",
+				},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
+			},
+		},
 	} {
 		tc := tc
 
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			actual, err := m3u.Decode(strings.NewReader(tc.src))
+			actual, err := tc.decoder.Decode(strings.NewReader(tc.src))
 			if !errors.Is(err, tc.expectErr) {
 				t.Fatalf("Expected error to be %v, got %v", tc.expectErr, err)
 			}
@@ -139,6 +161,24 @@ func TestEncode(t *testing.T) {
 /boo/far.flac
 			`) + "\n",
 			playlist: m3u.Playlist{
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
+			},
+		},
+		{
+			name: "Playlist level directives",
+			expect: strings.TrimSpace(`
+#EXTM3U
+#PLAYLIST:Foobar
+/foo/bar.flac
+/boo/far.flac
+			`) + "\n",
+			playlist: m3u.Playlist{
+				Ext: []string{
+					"#PLAYLIST:Foobar",
+				},
 				Tracks: []m3u.Track{
 					{Path: "/foo/bar.flac"},
 					{Path: "/boo/far.flac"},
@@ -203,6 +243,7 @@ func TestDecodeEncode(t *testing.T) {
 
 	golden := strings.TrimSpace(`
 #EXTM3U
+#PLAYLIST:Powerwolf
 #EXTALB:The Sacrament of Sin
 #EXTART:Powerwolf
 #EXTINF:287,Sacred & Wild
@@ -213,7 +254,10 @@ func TestDecodeEncode(t *testing.T) {
 ../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac
 	`) + "\n"
 
-	playlist, err := m3u.Decode(strings.NewReader(golden))
+	decoder := m3u.Decoder{IsGlobalDirective: func(s string) bool {
+		return strings.HasPrefix(s, "#PLAYLIST:")
+	}}
+	playlist, err := decoder.Decode(strings.NewReader(golden))
 	if err != nil {
 		t.Fatalf("decoding golden playlist: %v", err)
 	}
