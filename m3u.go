@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-type Playlist []Track
+type Playlist struct {
+	Ext    []string
+	Tracks []Track
+}
 
 type Track struct {
 	Ext  []string
@@ -35,7 +38,7 @@ func Decode(src io.Reader) (Playlist, error) {
 		}
 
 		track.Path = line
-		playlist = append(playlist, track)
+		playlist.Tracks = append(playlist.Tracks, track)
 		track = Track{}
 	}
 
@@ -48,7 +51,7 @@ func (p Playlist) Encode(w io.Writer) error {
 		return err
 	}
 
-	for _, track := range p {
+	for _, track := range p.Tracks {
 		for _, ext := range track.Ext {
 			_, err := fmt.Fprintln(w, ext)
 			if err != nil {
@@ -69,13 +72,13 @@ func (p Playlist) Deduplicate() Playlist {
 	added := map[string]bool{}
 	newP := Playlist{}
 
-	for _, track := range p {
+	for _, track := range p.Tracks {
 		if added[track.Path] {
 			continue
 		}
 
 		added[track.Path] = true
-		newP = append(newP, track)
+		newP.Tracks = append(newP.Tracks, track)
 	}
 
 	return newP

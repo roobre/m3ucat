@@ -28,7 +28,7 @@ func main() {
 				log.Printf("Error parsing %q, ignoring: %v", path, err)
 			}
 
-			all = append(all, playlist...)
+			all.Tracks = append(all.Tracks, playlist.Tracks...)
 		}()
 	}
 

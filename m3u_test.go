@@ -26,8 +26,10 @@ func TestDecode(t *testing.T) {
 /boo/far.flac
 			`,
 			expect: m3u.Playlist{
-				{Path: "/foo/bar.flac"},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
 			},
 		},
 		{
@@ -44,20 +46,22 @@ func TestDecode(t *testing.T) {
 ../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac
 			`,
 			expect: m3u.Playlist{
-				{
-					Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/01. Epica - Sacred & Wild.flac",
-					Ext: []string{
-						"#EXTALB:The Sacrament of Sin",
-						"#EXTART:Powerwolf",
-						"#EXTINF:287,Sacred & Wild",
+				Tracks: []m3u.Track{
+					{
+						Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/01. Epica - Sacred & Wild.flac",
+						Ext: []string{
+							"#EXTALB:The Sacrament of Sin",
+							"#EXTART:Powerwolf",
+							"#EXTINF:287,Sacred & Wild",
+						},
 					},
-				},
-				{
-					Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac",
-					Ext: []string{
-						"#EXTALB:The Sacrament of Sin",
-						"#EXTART:Powerwolf",
-						"#EXTINF:227,Resurrection by Erection",
+					{
+						Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac",
+						Ext: []string{
+							"#EXTALB:The Sacrament of Sin",
+							"#EXTART:Powerwolf",
+							"#EXTINF:227,Resurrection by Erection",
+						},
 					},
 				},
 			},
@@ -79,21 +83,23 @@ func TestDecode(t *testing.T) {
 ../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac
 			`,
 			expect: m3u.Playlist{
-				{
-					Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/01. Epica - Sacred & Wild.flac",
-					Ext: []string{
-						"#EXTALB:The Sacrament of Sin",
-						"#EXTART:Powerwolf",
-						"#EXTINF:287,Sacred & Wild",
+				Tracks: []m3u.Track{
+					{
+						Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/01. Epica - Sacred & Wild.flac",
+						Ext: []string{
+							"#EXTALB:The Sacrament of Sin",
+							"#EXTART:Powerwolf",
+							"#EXTINF:287,Sacred & Wild",
+						},
 					},
-				},
-				{Path: "/another/file.flac"},
-				{
-					Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac",
-					Ext: []string{
-						"#EXTALB:The Sacrament of Sin",
-						"#EXTART:Powerwolf",
-						"#EXTINF:227,Resurrection by Erection",
+					{Path: "/another/file.flac"},
+					{
+						Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac",
+						Ext: []string{
+							"#EXTALB:The Sacrament of Sin",
+							"#EXTART:Powerwolf",
+							"#EXTINF:227,Resurrection by Erection",
+						},
 					},
 				},
 			},
@@ -133,8 +139,10 @@ func TestEncode(t *testing.T) {
 /boo/far.flac
 			`) + "\n",
 			playlist: m3u.Playlist{
-				{Path: "/foo/bar.flac"},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
 			},
 		},
 		{
@@ -151,20 +159,22 @@ func TestEncode(t *testing.T) {
 ../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac
 			`) + "\n",
 			playlist: m3u.Playlist{
-				{
-					Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/01. Epica - Sacred & Wild.flac",
-					Ext: []string{
-						"#EXTALB:The Sacrament of Sin",
-						"#EXTART:Powerwolf",
-						"#EXTINF:287,Sacred & Wild",
+				Tracks: []m3u.Track{
+					{
+						Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/01. Epica - Sacred & Wild.flac",
+						Ext: []string{
+							"#EXTALB:The Sacrament of Sin",
+							"#EXTART:Powerwolf",
+							"#EXTINF:287,Sacred & Wild",
+						},
 					},
-				},
-				{
-					Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac",
-					Ext: []string{
-						"#EXTALB:The Sacrament of Sin",
-						"#EXTART:Powerwolf",
-						"#EXTINF:227,Resurrection by Erection",
+					{
+						Path: "../Powerwolf/2018 - The Sacrament of Sin/CD2/04. Battle Beast - Resurrection By Erection.flac",
+						Ext: []string{
+							"#EXTALB:The Sacrament of Sin",
+							"#EXTART:Powerwolf",
+							"#EXTINF:227,Resurrection by Erection",
+						},
 					},
 				},
 			},
@@ -230,36 +240,48 @@ func TestPlaylist_Deduplicate(t *testing.T) {
 		{
 			name: "No dupes",
 			playlist: m3u.Playlist{
-				{Path: "/foo/bar.flac"},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
 			},
 			expected: m3u.Playlist{
-				{Path: "/foo/bar.flac"},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
 			},
 		},
 		{
 			name: "Dupes",
 			playlist: m3u.Playlist{
-				{Path: "/foo/bar.flac"},
-				{Path: "/foo/bar.flac"},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
 			},
 			expected: m3u.Playlist{
-				{Path: "/foo/bar.flac"},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac"},
+					{Path: "/boo/far.flac"},
+				},
 			},
 		},
 		{
 			name: "Metadata is ignored",
 			playlist: m3u.Playlist{
-				{Path: "/foo/bar.flac", Ext: []string{"foo"}},
-				{Path: "/foo/bar.flac", Ext: []string{"bar"}},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac", Ext: []string{"foo"}},
+					{Path: "/foo/bar.flac", Ext: []string{"bar"}},
+					{Path: "/boo/far.flac"},
+				},
 			},
 			expected: m3u.Playlist{
-				{Path: "/foo/bar.flac", Ext: []string{"foo"}},
-				{Path: "/boo/far.flac"},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac", Ext: []string{"foo"}},
+					{Path: "/boo/far.flac"},
+				},
 			},
 		},
 	} {
