@@ -95,9 +95,10 @@ func (p Playlist) Encode(w io.Writer) error {
 }
 
 func (p Playlist) Deduplicate() Playlist {
-	added := map[string]bool{}
 	newP := Playlist{}
+	newP.Ext = append(newP.Ext, p.Ext...)
 
+	added := map[string]bool{}
 	for _, track := range p.Tracks {
 		if added[track.Path] {
 			continue

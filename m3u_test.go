@@ -328,6 +328,28 @@ func TestPlaylist_Deduplicate(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Playlist directives are preserved",
+			playlist: m3u.Playlist{
+				Ext: []string{
+					"#SOMETHING",
+				},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac", Ext: []string{"foo"}},
+					{Path: "/foo/bar.flac", Ext: []string{"bar"}},
+					{Path: "/boo/far.flac"},
+				},
+			},
+			expected: m3u.Playlist{
+				Ext: []string{
+					"#SOMETHING",
+				},
+				Tracks: []m3u.Track{
+					{Path: "/foo/bar.flac", Ext: []string{"foo"}},
+					{Path: "/boo/far.flac"},
+				},
+			},
+		},
 	} {
 		tc := tc
 
